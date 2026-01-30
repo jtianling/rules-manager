@@ -1,0 +1,39 @@
+{
+  "name": "rulesmgr",
+  "version": "0.1.0",
+  "description": "Unified rules manager for AI coding tools",
+  "type": "module",
+  "bin": {
+    "rulesmgr": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "ai",
+    "coding",
+    "rules",
+    "claude",
+    "cursor",
+    "cline"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "commander": "^14.0.2",
+    "inquirer": "^13.2.2"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.9",
+    "@types/node": "^25.1.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
