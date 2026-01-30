@@ -6,6 +6,10 @@
   "bin": {
     "rulesmgr": "./dist/index.js"
   },
+  "files": [
+    "dist",
+    "src/templates"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
