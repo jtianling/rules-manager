@@ -9,8 +9,11 @@
 ## Code Quality
 - Write self-documenting code with clear names
 - Keep functions small and focused (single responsibility)
-- Avoid deep nesting (max 3 levels)
+- Use Return ASAP Style in function and avoid deep nesting (max 3 levels)
 - Handle errors explicitly, don't swallow exceptions
+- Keep functions under 50 lines
+- Max line length: 88 characters
+- keep every code file under 400 lines
 
 ## DRY & YAGNI
 - Don't repeat yourself, but don't over-abstract prematurely

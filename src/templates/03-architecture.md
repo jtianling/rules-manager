@@ -12,6 +12,3 @@
 
 ## Naming Conventions
 - Files: kebab-case
-- Classes: PascalCase
-- Functions/variables: camelCase
-- Constants: UPPER_SNAKE_CASE
