@@ -5,16 +5,18 @@ export const RULES_MANAGER_DIR = join(homedir(), '.rules-manager');
 export const LANGUAGES_DIR = 'languages';
 
 export const SUPPORTED_TOOLS = [
-  'claude-code',
-  'cursor',
-  'cline',
-  'roo-code',
-  'kilo-code',
-  'windsurf',
-  'opencode',
-  'trae',
-  'goose',
+  // Preferred tools first
   'antigravity',
+  'roo-code',
+  'claude-code',
+  'opencode',
+  // Rest alphabetically
+  'cline',
+  'cursor',
+  'goose',
+  'kilo-code',
+  'trae',
+  'windsurf',
 ] as const;
 
 export type ToolName = typeof SUPPORTED_TOOLS[number];
