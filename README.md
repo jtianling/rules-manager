@@ -52,6 +52,7 @@ Syncs rules that were deployed with `--copy` mode.
 | OpenCode | `AGENTS.md` | ✗ (single file) |
 | TRAE | `.trae/rules/` | ✓ |
 | Goose | `goosehints` | ✗ (single file) |
+| Antigravity | `.agent/rules/` | ✓ |
 
 ## Directory Structure
 

@@ -75,4 +75,12 @@ export const TOOL_CONFIGS: Record<ToolName, ToolConfig> = {
     supportsLink: false,
     fileExtension: '',
   },
+  'antigravity': {
+    name: 'antigravity',
+    displayName: 'Antigravity',
+    targetPath: '.agent/rules',
+    supportsMultiFile: true,
+    supportsLink: true,
+    fileExtension: '.md',
+  },
 };

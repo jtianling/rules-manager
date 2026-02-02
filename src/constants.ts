@@ -14,6 +14,7 @@ export const SUPPORTED_TOOLS = [
   'opencode',
   'trae',
   'goose',
+  'antigravity',
 ] as const;
 
 export type ToolName = typeof SUPPORTED_TOOLS[number];
@@ -28,6 +29,7 @@ export const TOOL_DISPLAY_NAMES: Record<ToolName, string> = {
   'opencode': 'OpenCode',
   'trae': 'TRAE',
   'goose': 'Goose',
+  'antigravity': 'Antigravity',
 };
 
 export const DEFAULT_LANGUAGES = [
