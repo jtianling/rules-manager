@@ -2,6 +2,14 @@
   "name": "rulesmgr",
   "version": "0.1.0",
   "description": "Unified rules manager for AI coding tools",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jtianling/rules-manager.git"
+  },
+  "homepage": "https://github.com/jtianling/rules-manager#readme",
+  "bugs": {
+    "url": "https://github.com/jtianling/rules-manager/issues"
+  },
   "type": "module",
   "bin": {
     "rulesmgr": "./dist/index.js"
