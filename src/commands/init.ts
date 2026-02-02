@@ -39,13 +39,18 @@ export async function executeInit(options: InitOptions): Promise<void> {
   const availableLanguages = rulesService.getAvailableLanguages();
   let languages: string[];
   if (options.lang) {
-    languages = options.lang.split(',').map(l => l.trim());
-    // Validate languages exist
-    for (const lang of languages) {
-      if (!availableLanguages.includes(lang)) {
-        console.error(`Error: Language "${lang}" not found in ~/.rules-manager/languages/`);
-        console.error(`Available languages: ${availableLanguages.join(', ')}`);
-        process.exit(1);
+    // Allow --lang=none to skip language selection
+    if (options.lang.toLowerCase() === 'none') {
+      languages = [];
+    } else {
+      languages = options.lang.split(',').map(l => l.trim());
+      // Validate languages exist
+      for (const lang of languages) {
+        if (!availableLanguages.includes(lang)) {
+          console.error(`Error: Language "${lang}" not found in ~/.rules-manager/languages/`);
+          console.error(`Available languages: ${availableLanguages.join(', ')}`);
+          process.exit(1);
+        }
       }
     }
   } else {

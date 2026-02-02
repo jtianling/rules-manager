@@ -36,14 +36,8 @@ export async function promptLanguages(availableLanguages: string[]): Promise<str
     {
       type: 'checkbox',
       name: 'languages',
-      message: 'Select languages:',
+      message: 'Select languages (optional, press Enter to skip):',
       choices,
-      validate: (answer: string[]) => {
-        if (answer.length === 0) {
-          return 'You must select at least one language.';
-        }
-        return true;
-      },
     },
   ]);
 
