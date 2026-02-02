@@ -26,8 +26,28 @@ export async function executeSetup(targetDir: string = RULES_MANAGER_DIR): Promi
   const langTargetDir = join(targetDir, LANGUAGES_DIR);
   copyTemplates(langTemplatesDir, langTargetDir);
 
+  // Copy gitignore template
+  copyGitignoreTemplate(TEMPLATES_DIR, targetDir);
+
   console.log('\nSetup complete!');
   console.log(`\nEdit your rules in ${targetDir}`);
+}
+
+function copyGitignoreTemplate(srcDir: string, destDir: string): void {
+  const srcPath = join(srcDir, 'gitignore');
+  const destPath = join(destDir, 'gitignore');
+
+  if (!existsSync(srcPath)) {
+    return;
+  }
+
+  if (existsSync(destPath)) {
+    console.log('  Skipped gitignore (already exists)');
+  } else {
+    const content = readFileSync(srcPath, 'utf-8');
+    writeFileSync(destPath, content);
+    console.log('  Created gitignore');
+  }
 }
 
 function copyTemplates(srcDir: string, destDir: string): void {

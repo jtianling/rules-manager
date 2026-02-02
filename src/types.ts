@@ -19,6 +19,7 @@ export interface InitOptions {
   lang?: string;
   rules?: string;
   copy?: boolean;
+  gitignore?: boolean;
 }
 
 export interface ToolConfig {

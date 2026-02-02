@@ -29,6 +29,12 @@ npx rulesmgr init --tools=claude-code,cursor --lang=typescript
 
 # Use copy instead of symlink
 npx rulesmgr init --tools=claude-code --copy
+
+# Deploy .gitignore
+npx rulesmgr init --gitignore
+
+# Deploy rules and .gitignore together
+npx rulesmgr init --tools=claude-code --gitignore
 ```
 
 ### Sync copied rules
