@@ -1,68 +1,68 @@
 # rulesmgr
 
-English | [中文](./README.zh-CN.md)
+[English](./README.md) | 中文
 
-Unified rules manager for AI coding tools. Maintain one set of rules, deploy to Claude Code, Cursor, Cline, and more.
+AI 编程工具的统一规则管理器。维护一份规则，部署到 Claude Code、Cursor、Cline 等多个工具。
 
-## Installation
-
-```bash
-npx rulesmgr setup
-```
-
-## Usage
-
-### Setup global rules
+## 安装
 
 ```bash
 npx rulesmgr setup
 ```
 
-Creates `~/.rules-manager/` with example rule templates.
+## 使用方法
 
-### Deploy rules to a project
+### 初始化全局规则
 
 ```bash
-# Interactive mode
+npx rulesmgr setup
+```
+
+在 `~/.rules-manager/` 创建示例规则模板。
+
+### 部署规则到项目
+
+```bash
+# 交互模式
 npx rulesmgr init
 
-# With arguments
+# 指定参数
 npx rulesmgr init --tools=claude-code,cursor --lang=typescript
 
-# Use copy instead of symlink
+# 使用复制模式（而非符号链接）
 npx rulesmgr init --tools=claude-code --copy
 
-# Deploy .gitignore
+# 部署 .gitignore
 npx rulesmgr init --gitignore
 
-# Deploy rules and .gitignore together
+# 同时部署规则和 .gitignore
 npx rulesmgr init --tools=claude-code --gitignore
 ```
 
-### Sync copied rules
+### 同步已复制的规则
 
 ```bash
 npx rulesmgr sync
 ```
 
-Syncs rules that were deployed with `--copy` mode.
+同步使用 `--copy` 模式部署的规则。
 
-## Supported Tools
+## 支持的工具
 
-| Tool | Path | Link Support |
-|------|------|--------------|
+| 工具 | 路径 | 支持链接 |
+|------|------|----------|
 | Claude Code | `.claude/rules/` | ✓ |
-| Cursor | `.cursor/rules/` | ✗ (requires .mdc) |
+| Cursor | `.cursor/rules/` | ✗ (需要 .mdc 格式) |
 | Cline | `.clinerules/` | ✓ |
 | Roo Code | `.roo/rules/` | ✓ |
 | Kilo Code | `.kilocode/rules/` | ✓ |
 | Windsurf | `.windsurf/rules/` | ✓ |
-| OpenCode | `AGENTS.md` | ✗ (single file) |
+| OpenCode | `AGENTS.md` | ✗ (单文件) |
 | TRAE | `.trae/rules/` | ✓ |
-| Goose | `goosehints` | ✗ (single file) |
+| Goose | `goosehints` | ✗ (单文件) |
 | Antigravity | `.agent/rules/` | ✓ |
 
-## Directory Structure
+## 目录结构
 
 ```
 ~/.rules-manager/
@@ -72,12 +72,13 @@ Syncs rules that were deployed with `--copy` mode.
 ├── 04-testing.md
 ├── 05-git-commit.md
 ├── 06-code-review.md
+├── gitignore
 └── languages/
     ├── typescript-coding-style.md
     ├── python-coding-style.md
     └── ...
 ```
 
-## License
+## 许可证
 
 MIT
