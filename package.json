@@ -32,7 +32,7 @@
     "cursor",
     "cline"
   ],
-  "author": "",
+  "author": "jtianling <jtianling@gmail.com>",
   "license": "MIT",
   "engines": {
     "node": ">=18"
