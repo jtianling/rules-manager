@@ -9,6 +9,8 @@ export const TOOL_CONFIGS: Record<ToolName, ToolConfig> = {
     supportsMultiFile: true,
     supportsLink: true,
     fileExtension: '.md',
+    settingsDir: 'claude',
+    settingsTargetPath: '.claude',
   },
   'cursor': {
     name: 'cursor',

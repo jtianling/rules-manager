@@ -30,4 +30,8 @@ export interface ToolConfig {
   supportsLink: boolean;
   charLimit?: number;
   fileExtension: string;
+  /** Directory name under ~/.rules-manager/ for tool-specific settings */
+  settingsDir?: string;
+  /** Directory in the project where settings files should be copied to */
+  settingsTargetPath?: string;
 }

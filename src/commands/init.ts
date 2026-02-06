@@ -1,13 +1,14 @@
 import { Command } from 'commander';
-import { existsSync, copyFileSync } from 'fs';
+import { existsSync, copyFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { RULES_MANAGER_DIR, SUPPORTED_TOOLS } from '../constants.js';
-import { InitOptions } from '../types.js';
+import { InitOptions, ToolConfig } from '../types.js';
 import { RulesService } from '../services/rules.js';
 import { Deployer } from '../services/deployer.js';
 import { TOOL_CONFIGS } from '../tools/configs.js';
 import { promptTools, promptLanguages } from '../utils/prompts.js';
 import { sortByPriority } from '../utils/merge.js';
+import { ensureDir } from '../utils/fs.js';
 
 export async function executeInit(options: InitOptions): Promise<void> {
   // Check if rules manager is set up
@@ -82,6 +83,8 @@ export async function executeInit(options: InitOptions): Promise<void> {
 
       try {
         deployer.deploy(allRules, config, mode);
+        // Deploy agent-specific settings (always copy, never link)
+        deploySettings(config, process.cwd());
       } catch (error) {
         console.error(`\n✗ Error: ${(error as Error).message}`);
         process.exit(1);
@@ -94,6 +97,31 @@ export async function executeInit(options: InitOptions): Promise<void> {
   // Deploy gitignore if requested
   if (options.gitignore) {
     deployGitignore();
+  }
+}
+
+function deploySettings(config: ToolConfig, projectDir: string): void {
+  if (!config.settingsDir || !config.settingsTargetPath) return;
+
+  const settingsSrcDir = join(RULES_MANAGER_DIR, config.settingsDir);
+  if (!existsSync(settingsSrcDir)) return;
+
+  const settingsTargetDir = join(projectDir, config.settingsTargetPath);
+  ensureDir(settingsTargetDir);
+
+  const entries = readdirSync(settingsSrcDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isFile()) continue;
+
+    const srcPath = join(settingsSrcDir, entry.name);
+    const destPath = join(settingsTargetDir, entry.name);
+
+    if (existsSync(destPath)) {
+      console.log(`  ⊘ Skipped ${entry.name} (already exists)`);
+    } else {
+      copyFileSync(srcPath, destPath);
+      console.log(`  ✓ Copied ${entry.name}`);
+    }
   }
 }
 

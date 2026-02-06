@@ -54,4 +54,22 @@ describe('setup command', () => {
 
     expect(existsSync(join(testDir, 'languages'))).toBe(true);
   });
+
+  it('creates agent settings directories', async () => {
+    await executeSetup(testDir);
+
+    // Claude settings directory should be created
+    expect(existsSync(join(testDir, 'claude'))).toBe(true);
+    expect(existsSync(join(testDir, 'claude', 'settings.local.json'))).toBe(true);
+  });
+
+  it('does not overwrite existing agent settings', async () => {
+    mkdirSync(join(testDir, 'claude'), { recursive: true });
+    writeFileSync(join(testDir, 'claude', 'settings.local.json'), '{"custom": true}');
+
+    await executeSetup(testDir);
+
+    const content = readFileSync(join(testDir, 'claude', 'settings.local.json'), 'utf-8');
+    expect(content).toBe('{"custom": true}');
+  });
 });
