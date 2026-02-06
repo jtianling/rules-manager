@@ -14,4 +14,10 @@ program.addCommand(setupCommand);
 program.addCommand(initCommand);
 program.addCommand(syncCommand);
 
-program.parse();
+program.parseAsync().catch((error) => {
+  if (error?.name === 'ExitPromptError') {
+    console.log('\nCancelled.');
+    process.exit(0);
+  }
+  throw error;
+});
