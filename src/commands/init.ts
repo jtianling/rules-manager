@@ -112,6 +112,8 @@ function deploySettings(config: ToolConfig, projectDir: string): void {
   const entries = readdirSync(settingsSrcDir, { withFileTypes: true });
   for (const entry of entries) {
     if (!entry.isFile()) continue;
+    // Skip auto-generated files (e.g., CLAUDE.md from plugins)
+    if (entry.name === 'CLAUDE.md') continue;
 
     const srcPath = join(settingsSrcDir, entry.name);
     const destPath = join(settingsTargetDir, entry.name);
