@@ -69,6 +69,22 @@ export const TOOL_CONFIGS: Record<ToolName, ToolConfig> = {
     supportsLink: true,
     fileExtension: '.md',
   },
+  'codex': {
+    name: 'codex',
+    displayName: 'Codex CLI',
+    targetPath: 'AGENTS.md',
+    supportsMultiFile: false,
+    supportsLink: false,
+    fileExtension: '.md',
+  },
+  'gemini-cli': {
+    name: 'gemini-cli',
+    displayName: 'Gemini CLI',
+    targetPath: 'GEMINI.md',
+    supportsMultiFile: false,
+    supportsLink: false,
+    fileExtension: '.md',
+  },
   'goose': {
     name: 'goose',
     displayName: 'Goose',

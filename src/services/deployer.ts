@@ -1,5 +1,5 @@
 import { join, dirname } from 'path';
-import { writeFileSync } from 'fs';
+import { existsSync, writeFileSync } from 'fs';
 import { RuleFile, ToolConfig } from '../types.js';
 import { ensureDir, linkFile } from '../utils/fs.js';
 import { mergeRules, calculateMergedSize } from '../utils/merge.js';
@@ -60,6 +60,12 @@ export class Deployer {
 
   deploySingleFile(rules: RuleFile[], targetPath: string): void {
     const targetFile = join(this.projectDir, targetPath);
+
+    if (existsSync(targetFile)) {
+      console.log(`  ⚠ Skipped ${targetPath} (already exists, please handle manually)`);
+      return;
+    }
+
     ensureDir(dirname(targetFile));
 
     const merged = mergeRules(rules);
