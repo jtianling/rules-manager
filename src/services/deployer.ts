@@ -1,5 +1,5 @@
 import { join, dirname } from 'path';
-import { existsSync, writeFileSync } from 'fs';
+import { existsSync, writeFileSync, unlinkSync } from 'fs';
 import { RuleFile, ToolConfig } from '../types.js';
 import { ensureDir, linkFile } from '../utils/fs.js';
 import { mergeRules, calculateMergedSize } from '../utils/merge.js';
@@ -44,7 +44,7 @@ export class Deployer {
     ensureDir(targetDir);
 
     for (const rule of rules) {
-      const targetName = this.getTargetFileName(rule.name, extension);
+      const targetName = Deployer.getTargetFileName(rule.name, extension);
       const targetFile = join(targetDir, targetName);
 
       if (mode === 'link') {
@@ -73,9 +73,39 @@ export class Deployer {
     console.log(`  ✓ Created ${targetPath} (${rules.length} rules merged)`);
   }
 
-  private getTargetFileName(sourceName: string, targetExtension: string): string {
+  static getTargetFileName(sourceName: string, targetExtension: string): string {
     const baseName = sourceName.replace(/\.\w+$/, '');
     return `${baseName}${targetExtension}`;
+  }
+
+  deployOneRule(
+    rule: RuleFile,
+    toolConfig: ToolConfig,
+    mode: 'link' | 'copy'
+  ): void {
+    const effectiveMode = toolConfig.supportsLink ? mode : 'copy';
+    const targetDir = join(this.projectDir, toolConfig.targetPath);
+    ensureDir(targetDir);
+
+    const targetName = Deployer.getTargetFileName(rule.name, toolConfig.fileExtension);
+    const targetFile = join(targetDir, targetName);
+
+    if (effectiveMode === 'link') {
+      linkFile(rule.path, targetFile);
+    } else {
+      const content = this.transformContent(rule.content, toolConfig.fileExtension);
+      writeFileSync(targetFile, content);
+    }
+  }
+
+  removeRule(fileName: string, toolConfig: ToolConfig): void {
+    const targetPath = toolConfig.supportsMultiFile
+      ? join(this.projectDir, toolConfig.targetPath, fileName)
+      : join(this.projectDir, toolConfig.targetPath);
+
+    if (existsSync(targetPath)) {
+      unlinkSync(targetPath);
+    }
   }
 
   private transformContent(content: string, extension: string): string {

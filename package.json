@@ -1,6 +1,6 @@
 {
   "name": "rulesmgr",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Unified rules manager for AI coding tools",
   "repository": {
     "type": "git",

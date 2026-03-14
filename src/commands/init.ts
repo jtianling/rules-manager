@@ -2,9 +2,10 @@ import { Command } from 'commander';
 import { existsSync, copyFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { RULES_MANAGER_DIR, SUPPORTED_TOOLS } from '../constants.js';
-import { InitOptions, ToolConfig } from '../types.js';
+import { InitOptions, ToolConfig, ToolName } from '../types.js';
 import { RulesService } from '../services/rules.js';
 import { Deployer } from '../services/deployer.js';
+import { DeploymentScanner } from '../services/scanner.js';
 import { TOOL_CONFIGS } from '../tools/configs.js';
 import { promptTools, promptLanguages } from '../utils/prompts.js';
 import { sortByPriority } from '../utils/merge.js';
@@ -24,13 +25,18 @@ export async function executeInit(options: InitOptions): Promise<void> {
   if (!gitignoreOnly) {
     const rulesService = new RulesService(RULES_MANAGER_DIR);
     const deployer = new Deployer(process.cwd());
+    const scanner = new DeploymentScanner(process.cwd(), RULES_MANAGER_DIR);
+
+    // Get configured tools for marking in prompt
+    const configuredTools = scanner.getConfiguredTools();
+    const isInteractive = !options.tools;
 
     // Get tools (from args or prompt)
     let tools: string[];
     if (options.tools) {
       tools = options.tools.split(',').map(t => t.trim());
     } else {
-      tools = await promptTools([...SUPPORTED_TOOLS]);
+      tools = await promptTools([...SUPPORTED_TOOLS], configuredTools);
     }
 
     // Validate tools
@@ -38,6 +44,51 @@ export async function executeInit(options: InitOptions): Promise<void> {
       if (!TOOL_CONFIGS[tool as keyof typeof TOOL_CONFIGS]) {
         console.error(`Error: Unknown tool "${tool}"`);
         process.exit(1);
+      }
+    }
+
+    // Handle deselected tools (remove their rules) - only in interactive mode
+    // Only for multi-file tools; single-file tools (AGENTS.md etc.) are never auto-removed
+    if (isInteractive) {
+      const deselectedTools = configuredTools.filter(t => !tools.includes(t));
+      for (const tool of deselectedTools) {
+        const config = TOOL_CONFIGS[tool];
+
+        if (!config.supportsMultiFile) {
+          // Single-file tools: never auto-remove, just warn
+          console.log(`\n${config.displayName}:`);
+          console.log(`  ⚠ ${config.targetPath} exists (please remove manually if needed)`);
+          continue;
+        }
+
+        const deployedRules = scanner.getDeployedRules(tool);
+        const managedRules = deployedRules.filter(r => r.source === 'managed');
+
+        if (managedRules.length > 0) {
+          console.log(`\n${config.displayName}:`);
+          for (const rule of managedRules) {
+            deployer.removeRule(rule.name, config);
+            console.log(`  ✗ ${rule.name} (removed)`);
+          }
+          const unmanagedRules = deployedRules.filter(r => r.source === 'unknown');
+          for (const rule of unmanagedRules) {
+            console.log(`  ~ ${rule.name} (unmanaged)`);
+          }
+        }
+      }
+    }
+
+    // Detect deployed languages from selected tools for pre-selection
+    const deployedLanguages = new Set<string>();
+    if (isInteractive) {
+      for (const tool of tools) {
+        const deployedRules = scanner.getDeployedRules(tool as ToolName);
+        for (const rule of deployedRules) {
+          const match = rule.name.match(/^(.+)-coding-style\.\w+$/);
+          if (match) {
+            deployedLanguages.add(match[1]);
+          }
+        }
       }
     }
 
@@ -60,7 +111,10 @@ export async function executeInit(options: InitOptions): Promise<void> {
         }
       }
     } else {
-      languages = await promptLanguages(availableLanguages);
+      languages = await promptLanguages(
+        availableLanguages,
+        deployedLanguages.size > 0 ? Array.from(deployedLanguages) : undefined
+      );
     }
 
     // Get deployment mode
@@ -82,7 +136,49 @@ export async function executeInit(options: InitOptions): Promise<void> {
       console.log(`${config.displayName}:`);
 
       try {
-        deployer.deploy(allRules, config, mode);
+        if (config.supportsMultiFile) {
+          // Get deployed rules for this tool
+          const deployedRules = scanner.getDeployedRules(tool as ToolName);
+          const deployedNameSet = new Set(deployedRules.map(r => r.name));
+
+          // Map selected rules to their target file names
+          const selectedTargetNames = new Map<string, typeof allRules[0]>();
+          for (const rule of allRules) {
+            const targetName = Deployer.getTargetFileName(rule.name, config.fileExtension);
+            selectedTargetNames.set(targetName, rule);
+          }
+
+          // Remove rules that are no longer selected (managed only)
+          const toRemove = deployedRules.filter(
+            r => !selectedTargetNames.has(r.name) && r.source === 'managed'
+          );
+          for (const rule of toRemove) {
+            deployer.removeRule(rule.name, config);
+            console.log(`  ✗ ${rule.name} (removed)`);
+          }
+
+          // Deploy new and keep existing
+          for (const [targetName, rule] of selectedTargetNames) {
+            if (deployedNameSet.has(targetName)) {
+              console.log(`  · ${targetName} (unchanged)`);
+            } else {
+              deployer.deployOneRule(rule, config, mode);
+              console.log(`  ✓ ${targetName} (${mode === 'link' ? 'linked' : 'copied'})`);
+            }
+          }
+
+          // Show unmanaged files
+          const unmanaged = deployedRules.filter(
+            r => !selectedTargetNames.has(r.name) && r.source === 'unknown'
+          );
+          for (const rule of unmanaged) {
+            console.log(`  ~ ${rule.name} (unmanaged)`);
+          }
+        } else {
+          // Single-file tools: use existing deploy method
+          deployer.deploy(allRules, config, mode);
+        }
+
         // Deploy agent-specific settings (always copy, never link)
         deploySettings(config, process.cwd());
       } catch (error) {

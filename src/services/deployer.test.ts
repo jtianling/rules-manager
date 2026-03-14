@@ -215,4 +215,131 @@ describe('Deployer', () => {
       expect(existsSync(join(projectDir, 'AGENTS.md'))).toBe(true);
     });
   });
+
+  describe('removeRule', () => {
+    it('removes a multi-file rule', () => {
+      const rules = [makeRule('test.md', 'content')];
+      const deployer = new Deployer(projectDir);
+      const toolConfig = {
+        name: 'claude-code' as const,
+        displayName: 'Claude Code',
+        targetPath: '.claude/rules',
+        supportsMultiFile: true,
+        supportsLink: true,
+        fileExtension: '.md',
+      };
+
+      deployer.deploy(rules, toolConfig, 'copy');
+      expect(existsSync(join(projectDir, '.claude/rules/test.md'))).toBe(true);
+
+      deployer.removeRule('test.md', toolConfig);
+      expect(existsSync(join(projectDir, '.claude/rules/test.md'))).toBe(false);
+    });
+
+    it('removes a symlinked rule', () => {
+      const rules = [makeRule('test.md', 'content')];
+      const deployer = new Deployer(projectDir);
+      const toolConfig = {
+        name: 'claude-code' as const,
+        displayName: 'Claude Code',
+        targetPath: '.claude/rules',
+        supportsMultiFile: true,
+        supportsLink: true,
+        fileExtension: '.md',
+      };
+
+      deployer.deploy(rules, toolConfig, 'link');
+      expect(existsSync(join(projectDir, '.claude/rules/test.md'))).toBe(true);
+
+      deployer.removeRule('test.md', toolConfig);
+      expect(existsSync(join(projectDir, '.claude/rules/test.md'))).toBe(false);
+    });
+
+    it('does nothing when file does not exist', () => {
+      const deployer = new Deployer(projectDir);
+      const toolConfig = {
+        name: 'claude-code' as const,
+        displayName: 'Claude Code',
+        targetPath: '.claude/rules',
+        supportsMultiFile: true,
+        supportsLink: true,
+        fileExtension: '.md',
+      };
+
+      expect(() => deployer.removeRule('nonexistent.md', toolConfig)).not.toThrow();
+    });
+  });
+
+  describe('deployOneRule', () => {
+    it('deploys a single rule in copy mode', () => {
+      const rule = makeRule('test.md', 'content');
+      const deployer = new Deployer(projectDir);
+      const toolConfig = {
+        name: 'claude-code' as const,
+        displayName: 'Claude Code',
+        targetPath: '.claude/rules',
+        supportsMultiFile: true,
+        supportsLink: true,
+        fileExtension: '.md',
+      };
+
+      deployer.deployOneRule(rule, toolConfig, 'copy');
+
+      const targetPath = join(projectDir, '.claude/rules/test.md');
+      expect(existsSync(targetPath)).toBe(true);
+      expect(readFileSync(targetPath, 'utf-8')).toBe('content');
+    });
+
+    it('deploys a single rule in link mode', () => {
+      const rule = makeRule('test.md', 'content');
+      const deployer = new Deployer(projectDir);
+      const toolConfig = {
+        name: 'claude-code' as const,
+        displayName: 'Claude Code',
+        targetPath: '.claude/rules',
+        supportsMultiFile: true,
+        supportsLink: true,
+        fileExtension: '.md',
+      };
+
+      deployer.deployOneRule(rule, toolConfig, 'link');
+
+      const targetPath = join(projectDir, '.claude/rules/test.md');
+      expect(existsSync(targetPath)).toBe(true);
+      expect(isSymlink(targetPath)).toBe(true);
+    });
+
+    it('adds MDC frontmatter for cursor', () => {
+      const rule = makeRule('test.md', 'rule content');
+      const deployer = new Deployer(projectDir);
+      const toolConfig = {
+        name: 'cursor' as const,
+        displayName: 'Cursor',
+        targetPath: '.cursor/rules',
+        supportsMultiFile: true,
+        supportsLink: false,
+        fileExtension: '.mdc',
+      };
+
+      deployer.deployOneRule(rule, toolConfig, 'copy');
+
+      const content = readFileSync(join(projectDir, '.cursor/rules/test.mdc'), 'utf-8');
+      expect(content).toContain('alwaysApply: true');
+      expect(content).toContain('rule content');
+    });
+  });
+
+  describe('getTargetFileName', () => {
+    it('converts .md source to .md target', () => {
+      expect(Deployer.getTargetFileName('test.md', '.md')).toBe('test.md');
+    });
+
+    it('converts .md source to .mdc target', () => {
+      expect(Deployer.getTargetFileName('test.md', '.mdc')).toBe('test.mdc');
+    });
+
+    it('handles names with numbers', () => {
+      expect(Deployer.getTargetFileName('01-coding-principles.md', '.md')).toBe('01-coding-principles.md');
+    });
+  });
 });
